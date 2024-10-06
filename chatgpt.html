@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ultimate Incremental Clicker Game</title>
+    <style>
+        /* --- Styles --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #2e2e2e;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 1200px;
+            margin: auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        button {
+            padding: 15px 25px;
+            font-size: 18px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            position: relative;
+            outline: none;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button[disabled] {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        button[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            padding: 5px 10px;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        p {
+            font-size: 50px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .upgrade {
+            margin-top: 10px;
+        }
+
+        .upgrade button {
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            margin: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .upgrade button:hover {
+            background-color: #27ae60;
+        }
+
+        .upgrades-container {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 10px;
+            background: #1e1e1e;
+        }
+
+        h2 {
+            font-size: 32px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #fff;
+            padding-bottom: 10px;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            background: #1e1e1e;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-panel h3 {
+            margin: 0;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .stats-panel p {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        .upgrade-panels {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .upgrade-panel {
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 8px;
+            width: 140px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 5px;
+        }
+
+        .upgrade-panel.active {
+            background-color: #e67e22;
+        }
+
+        .upgrade-panel:hover {
+            background-color: #2c3e50;
+        }
+
+        .notification {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            font-size: 18px;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f1c40f;
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .options-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            color: #fff;
+            display: none;
+            z-index: 1000;
+        }
+
+        .options-menu h3 {
+            margin-top: 0;
+        }
+
+        /* Achievements Tab */
+        .achievements-tab {
+            margin-top: 30px;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            color: #fff;
+            text-align: left;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .achievement {
+            padding: 10px;
+            border-bottom: 1px solid #fff;
+            position: relative;
+        }
+
+        .achievement.unlocked {
+            color: #2ecc71;
+        }
+
+        .achievement .rating {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #fff;
+        }
+
+        .rating.red {
+            background-color: #e74c3c;
+        }
+
+        .rating.yellow {
+            background-color: #f1c40f;
+            color: #000;
+        }
+
+        .rating.green {
+            background-color: #2ecc71;
+        }
+
+        /* Skill Tree Styles */
+        #skillTreeCanvas {
+            background-color: #1e1e1e;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        #skillTreeSection {
+            overflow-y: auto;
+            max-height: 600px; /* Adjust as needed */
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            padding: 5px 10px;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        /* Ending Message */
+        .ending-message {
+            font-size: 30px;
+            margin-top: 50px;
+            color: #f1c40f;
+        }
+
+        /* Scrollbars */
+        .upgrades-container::-webkit-scrollbar,
+        .achievements-tab::-webkit-scrollbar,
+        #skillTreeSection::-webkit-scrollbar,
+        .game-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .upgrades-container::-webkit-scrollbar-track,
+        .achievements-tab::-webkit-scrollbar-track,
+        #skillTreeSection::-webkit-scrollbar-track,
+        .game-container::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        .upgrades-container::-webkit-scrollbar-thumb,
+        .achievements-tab::-webkit-scrollbar-thumb,
+        #skillTreeSection::-webkit-scrollbar-thumb,
+        .game-container::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 5px;
+        }
+
+        .upgrades-container::-webkit-scrollbar-thumb:hover,
+        .achievements-tab::-webkit-scrollbar-thumb:hover,
+        #skillTreeSection::-webkit-scrollbar-thumb:hover,
+        .game-container::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h2>Ultimate Incremental Clicker Game</h2>
+
+        <!-- Main Click Button -->
+        <button class="tooltip" data-tooltip="Click to earn Clicks" onclick="increment()">Click Me!</button>
+        <p id="counter">0</p>
+
+        <!-- Rebirth, Prestige, and Other Reset Buttons with Costs -->
+        <div>
+            <button id="rebirthButton" onclick="rebirth()" disabled>Rebirth - Cost: <span id="rebirthCostDisplay">1M</span> Clicks</button>
+            <button id="prestigeButton" onclick="prestige()" disabled>Prestige - Cost: <span id="prestigeCostDisplay">10 RP</span></button>
+            <button id="ultraRebirthButton" onclick="ultraRebirth()" disabled>Ultra Rebirth - Cost: <span id="ultraCostDisplay">10 PP</span></button>
+            <button id="quantumRebirthButton" onclick="quantumRebirth()" disabled>Quantum Rebirth - Cost: <span id="quantumCostDisplay">10 UP</span></button>
+            <button id="omegaRebirthButton" onclick="omegaRebirth()" disabled>Omega Rebirth - Cost: <span id="omegaCostDisplay">10 QP</span></button>
+            <button id="novaRebirthButton" onclick="novaRebirth()" disabled>Nova Rebirth - Cost: <span id="novaCostDisplay">10 OP</span></button>
+            <button id="galacticRebirthButton" onclick="galacticRebirth()" disabled>Galactic Rebirth - Cost: <span id="galacticCostDisplay">10 NP</span></button>
+            <button id="cosmicRebirthButton" onclick="cosmicRebirth()" disabled>Cosmic Rebirth - Cost: <span id="cosmicCostDisplay">10 GP</span></button>
+            <button id="infiniteRebirthButton" onclick="infiniteRebirth()" disabled>Infinite Rebirth - Cost: <span id="infiniteCostDisplay">10 CP</span></button>
+            <button id="etherealRebirthButton" onclick="etherealRebirth()" disabled>Ethereal Rebirth - Cost: <span id="etherealCostDisplay">10 IP</span></button>
+            <button id="transcendentRebirthButton" onclick="transcendentRebirth()" disabled>Transcendent Rebirth - Cost: <span id="transcendentCostDisplay">10 EP</span></button>
+        </div>
+
+        <!-- Save and Load Buttons -->
+        <div class="save-load-buttons">
+            <button onclick="saveGame()">Save Game</button>
+            <button onclick="loadGame()">Load Game</button>
+            <button onclick="resetGame()">Reset Game</button>
+            <button onclick="toggleOptionsMenu()">Options</button>
+        </div>
+
+        <!-- Upgrade Panels -->
+        <div class="upgrade-panels">
+            <div id="normalUpgradePanel" class="upgrade-panel active" onclick="showSection('normal')">Upgrades</div>
+            <div id="achievementsPanel" class="upgrade-panel" onclick="showSection('achievements')">Achievements</div>
+            <div id="skillTreePanel" class="upgrade-panel" onclick="showSection('skillTree')">Skill Tree</div>
+        </div>
+
+        <!-- Upgrade Sections -->
+        <div id="normalSection">
+            <!-- Sub Panels -->
+            <div class="upgrade-panels">
+                <div id="normalUpgradeSubPanel" class="upgrade-panel active" onclick="showUpgradeSection('normal')">Normal</div>
+                <div id="rebirthUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('rebirth')">Rebirth</div>
+                <div id="prestigeUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('prestige')">Prestige</div>
+                <div id="ultraUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('ultra')">Ultra</div>
+                <div id="quantumUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('quantum')">Quantum</div>
+                <div id="omegaUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('omega')">Omega</div>
+                <div id="novaUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('nova')">Nova</div>
+                <div id="galacticUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('galactic')">Galactic</div>
+                <div id="cosmicUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('cosmic')">Cosmic</div>
+                <div id="infiniteUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('infinite')">Infinite</div>
+                <div id="etherealUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('ethereal')">Ethereal</div>
+                <div id="transcendentUpgradeSubPanel" class="upgrade-panel" onclick="showUpgradeSection('transcendent')">Transcendent</div>
+            </div>
+
+            <!-- Upgrades Containers -->
+            <div class="upgrades-container" id="normalUpgradeSection">
+                <h2>Normal Upgrades</h2>
+                <div id="normalUpgradesContainer"></div>
+            </div>
+
+            <!-- Other Upgrade Sections -->
+            <!-- Repeat the structure for each tier -->
+            <div class="upgrades-container" id="rebirthUpgradeSection" style="display:none;">
+                <h2>Rebirth Upgrades</h2>
+                <div id="rebirthUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="prestigeUpgradeSection" style="display:none;">
+                <h2>Prestige Upgrades</h2>
+                <div id="prestigeUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="ultraUpgradeSection" style="display:none;">
+                <h2>Ultra Upgrades</h2>
+                <div id="ultraUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="quantumUpgradeSection" style="display:none;">
+                <h2>Quantum Upgrades</h2>
+                <div id="quantumUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="omegaUpgradeSection" style="display:none;">
+                <h2>Omega Upgrades</h2>
+                <div id="omegaUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="novaUpgradeSection" style="display:none;">
+                <h2>Nova Upgrades</h2>
+                <div id="novaUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="galacticUpgradeSection" style="display:none;">
+                <h2>Galactic Upgrades</h2>
+                <div id="galacticUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="cosmicUpgradeSection" style="display:none;">
+                <h2>Cosmic Upgrades</h2>
+                <div id="cosmicUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="infiniteUpgradeSection" style="display:none;">
+                <h2>Infinite Upgrades</h2>
+                <div id="infiniteUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="etherealUpgradeSection" style="display:none;">
+                <h2>Ethereal Upgrades</h2>
+                <div id="etherealUpgradesContainer"></div>
+            </div>
+
+            <div class="upgrades-container" id="transcendentUpgradeSection" style="display:none;">
+                <h2>Transcendent Upgrades</h2>
+                <div id="transcendentUpgradesContainer"></div>
+            </div>
+        </div>
+
+        <!-- Achievements Section -->
+        <div id="achievementsSection" style="display:none;">
+            <h2>Achievements</h2>
+            <div class="achievements-tab" id="achievementsContainer">
+                <!-- Achievements will be listed here -->
+            </div>
+        </div>
+
+        <!-- Skill Tree Section -->
+        <div id="skillTreeSection" style="display:none;">
+            <h2>Skill Tree</h2>
+            <p>Skill Points: <span id="skillPointsDisplay">0</span></p>
+            <canvas id="skillTreeCanvas" width="900" height="2000"></canvas>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <h3>Stats</h3>
+            <p>Clicks: <span id="statClicks">0</span></p>
+            <p>Rebirth Points (RP): <span id="statRebirthPoints">0</span></p>
+            <p>Prestige Points (PP): <span id="statPrestigePoints">0</span></p>
+            <p>Ultra Points (UP): <span id="statUltraPoints">0</span></p>
+            <p>Quantum Points (QP): <span id="statQuantumPoints">0</span></p>
+            <p>Omega Points (OP): <span id="statOmegaPoints">0</span></p>
+            <p>Nova Points (NP): <span id="statNovaPoints">0</span></p>
+            <p>Galactic Points (GP): <span id="statGalacticPoints">0</span></p>
+            <p>Cosmic Points (CP): <span id="statCosmicPoints">0</span></p>
+            <p>Infinite Points (IP): <span id="statInfinitePoints">0</span></p>
+            <p>Ethereal Points (EP): <span id="statEtherealPoints">0</span></p>
+            <p>Transcendent Points (TP): <span id="statTranscendentPoints">0</span></p>
+        </div>
+
+        <!-- Achievement Popup -->
+        <div id="achievementPopup" class="achievement-popup"></div>
+
+        <!-- Notification -->
+        <div id="notification" class="notification"></div>
+
+        <!-- Options Menu -->
+        <div id="optionsMenu" class="options-menu">
+            <h3>Options</h3>
+            <label>
+                <input type="checkbox" id="soundToggle" onchange="toggleSound()" checked>
+                Sound Effects
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" id="musicToggle" onchange="toggleMusic()" checked>
+                Background Music
+            </label>
+            <!-- Other options can be added here -->
+        </div>
+
+        <!-- Ending Message -->
+        <div id="endingMessage" class="ending-message" style="display:none;">
+            Congratulations! You've reached the end of the game!
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code to implement all features and functionalities.
+
+        // Game Variables
+        let clicks = 0;
+        let incrementAmount = 1;
+
+        // Multipliers for each tier
+        let normalMultiplier = 1;
+        let rebirthMultiplier = 1;
+        let prestigeMultiplier = 1;
+        let ultraMultiplier = 1;
+        let quantumMultiplier = 1;
+        let omegaMultiplier = 1;
+        let novaMultiplier = 1;
+        let galacticMultiplier = 1;
+        let cosmicMultiplier = 1;
+        let infiniteMultiplier = 1;
+        let etherealMultiplier = 1;
+        let transcendentMultiplier = 1;
+
+        // Resources
+        let rebirthPoints = 0;
+        let prestigePoints = 0;
+        let ultraPoints = 0;
+        let quantumPoints = 0;
+        let omegaPoints = 0;
+        let novaPoints = 0;
+        let galacticPoints = 0;
+        let cosmicPoints = 0;
+        let infinitePoints = 0;
+        let etherealPoints = 0;
+        let transcendentPoints = 0;
+
+        // Rebirth Counts and Costs
+        let rebirthCount = 0;
+        let prestigeCount = 0;
+        let ultraCount = 0;
+        let quantumCount = 0;
+        let omegaCount = 0;
+        let novaCount = 0;
+        let galacticCount = 0;
+        let cosmicCount = 0;
+        let infiniteCount = 0;
+        let etherealCount = 0;
+        let transcendentCount = 0;
+
+        const initialRebirthCost = 1e6;
+        const rebirthCostMultiplier = 2;
+
+        // Skill Tree
+        let skillPoints = 0;
+        let skillTree = {};
+
+        // Sound Settings
+        let soundEnabled = true;
+        let musicEnabled = true;
+
+        // Achievements
+        let achievements = [];
+        initializeAchievements();
+
+        function initializeAchievements() {
+            achievements = [
+                // Green Achievements (5 Skill Points)
+                { name: 'First Click', description: 'Make your first click', condition: () => clicks >= 1, unlocked: false, skillPoints: 5 },
+                { name: 'Click Novice', description: 'Reach 1,000 Clicks', condition: () => clicks >= 1e3, unlocked: false, skillPoints: 5 },
+                { name: 'Rebirth Initiate', description: 'Perform your first rebirth', condition: () => rebirthCount >= 1, unlocked: false, skillPoints: 5 },
+                { name: 'Prestige Initiate', description: 'Perform your first prestige', condition: () => prestigeCount >= 1, unlocked: false, skillPoints: 5 },
+                // Yellow Achievements (10 Skill Points)
+                { name: 'Click Expert', description: 'Reach 1 Million Clicks', condition: () => clicks >= 1e6, unlocked: false, skillPoints: 10 },
+                { name: 'Rebirth Adept', description: 'Perform 10 rebirths', condition: () => rebirthCount >= 10, unlocked: false, skillPoints: 10 },
+                { name: 'Prestige Adept', description: 'Perform 5 prestiges', condition: () => prestigeCount >= 5, unlocked: false, skillPoints: 10 },
+                { name: 'Ultra Beginner', description: 'Perform your first Ultra Rebirth', condition: () => ultraCount >= 1, unlocked: false, skillPoints: 10 },
+                // Red Achievements (15 Skill Points)
+                { name: 'Click Master', description: 'Reach 1 Trillion Clicks', condition: () => clicks >= 1e12, unlocked: false, skillPoints: 15 },
+                { name: 'Rebirth Master', description: 'Perform 100 rebirths', condition: () => rebirthCount >= 100, unlocked: false, skillPoints: 15 },
+                { name: 'Prestige Master', description: 'Perform 50 prestiges', condition: () => prestigeCount >= 50, unlocked: false, skillPoints: 15 },
+                { name: 'Transcendent Being', description: 'Perform a Transcendent Rebirth', condition: () => transcendentCount >= 1, unlocked: false, skillPoints: 20 },
+                // Additional Achievements to provide enough skill points
+                { name: 'Quantum Explorer', description: 'Perform 5 Quantum Rebirths', condition: () => quantumCount >= 5, unlocked: false, skillPoints: 15 },
+                { name: 'Omega Conqueror', description: 'Perform 5 Omega Rebirths', condition: () => omegaCount >= 5, unlocked: false, skillPoints: 15 },
+                { name: 'Nova Collector', description: 'Collect 1e6 Nova Points', condition: () => novaPoints >= 1e6, unlocked: false, skillPoints: 20 },
+                { name: 'Galactic Guardian', description: 'Collect 1e6 Galactic Points', condition: () => galacticPoints >= 1e6, unlocked: false, skillPoints: 20 },
+                { name: 'Cosmic Champion', description: 'Collect 1e6 Cosmic Points', condition: () => cosmicPoints >= 1e6, unlocked: false, skillPoints: 20 },
+                { name: 'Infinite Seeker', description: 'Collect 1e6 Infinite Points', condition: () => infinitePoints >= 1e6, unlocked: false, skillPoints: 25 },
+                { name: 'Ethereal Ascendant', description: 'Collect 1e6 Ethereal Points', condition: () => etherealPoints >= 1e6, unlocked: false, skillPoints: 25 },
+                // High-Value Achievements
+                { name: 'Rebirth Legend', description: 'Perform 500 rebirths', condition: () => rebirthCount >= 500, unlocked: false, skillPoints: 30 },
+                { name: 'Prestige Legend', description: 'Perform 250 prestiges', condition: () => prestigeCount >= 250, unlocked: false, skillPoints: 30 },
+                { name: 'Ultra Master', description: 'Perform 100 Ultra Rebirths', condition: () => ultraCount >= 100, unlocked: false, skillPoints: 35 },
+                { name: 'Quantum Master', description: 'Perform 50 Quantum Rebirths', condition: () => quantumCount >= 50, unlocked: false, skillPoints: 35 },
+                { name: 'Omega Master', description: 'Perform 25 Omega Rebirths', condition: () => omegaCount >= 25, unlocked: false, skillPoints: 40 },
+                { name: 'Galactic Overlord', description: 'Collect 1e12 Galactic Points', condition: () => galacticPoints >= 1e12, unlocked: false, skillPoints: 40 },
+                { name: 'Cosmic Overlord', description: 'Collect 1e12 Cosmic Points', condition: () => cosmicPoints >= 1e12, unlocked: false, skillPoints: 40 },
+                { name: 'Infinite Overlord', description: 'Collect 1e12 Infinite Points', condition: () => infinitePoints >= 1e12, unlocked: false, skillPoints: 45 },
+                { name: 'Ethereal Overlord', description: 'Collect 1e12 Ethereal Points', condition: () => etherealPoints >= 1e12, unlocked: false, skillPoints: 45 },
+                { name: 'Transcendent Overlord', description: 'Collect 1e12 Transcendent Points', condition: () => transcendentPoints >= 1e12, unlocked: false, skillPoints: 50 },
+            ];
+        }
+
+        function totalAchievementsUnlocked() {
+            return achievements.filter(ach => ach.unlocked).length;
+        }
+
+        // Variables for achievements tracking
+        let gameCompleted = false;
+
+        // Initialize Upgrades
+        let upgrades = {
+            normal: [],
+            rebirth: [],
+            prestige: [],
+            ultra: [],
+            quantum: [],
+            omega: [],
+            nova: [],
+            galactic: [],
+            cosmic: [],
+            infinite: [],
+            ethereal: [],
+            transcendent: []
+        };
+
+        // Random Name Generator for Upgrades
+        const adjectives = ["Powerful", "Mystic", "Enchanted", "Ancient", "Futuristic", "Cosmic", "Divine", "Eternal", "Infinite", "Ultimate"];
+        const nouns = ["Force", "Energy", "Aura", "Flame", "Blade", "Shield", "Sphere", "Crystal", "Orb", "Essence"];
+
+        function getRandomName() {
+            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            return `${adj} ${noun}`;
+        }
+
+        function initializeUpgrades() {
+            initializeNormalUpgrades();
+            let tierCounts = [100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50];
+            let tiers = ['rebirth', 'prestige', 'ultra', 'quantum', 'omega', 'nova', 'galactic', 'cosmic', 'infinite', 'ethereal', 'transcendent'];
+            for (let i = 0; i < tiers.length; i++) {
+                initializeTierUpgrades(tiers[i], tierCounts[i]);
+            }
+            renderAchievements();
+        }
+
+        function initializeNormalUpgrades() {
+            let cost = 25;
+            let multiplier = 2;
+            for (let i = 1; i <= 500; i++) {
+                upgrades.normal.push({
+                    name: getRandomName(),
+                    cost: cost,
+                    multiplier: multiplier,
+                    description: `Multiplies Clicks by x${multiplier}`
+                });
+                cost *= 2; // Double the cost each time
+                multiplier *= 2; // Double the multiplier each time
+            }
+            renderUpgrades('normal');
+        }
+
+        function initializeTierUpgrades(tier, count) {
+            const resources = {
+                rebirth: "Clicks",
+                prestige: "Rebirth Points",
+                ultra: "Prestige Points",
+                quantum: "Ultra Points",
+                omega: "Quantum Points",
+                nova: "Omega Points",
+                galactic: "Nova Points",
+                cosmic: "Galactic Points",
+                infinite: "Cosmic Points",
+                ethereal: "Infinite Points",
+                transcendent: "Ethereal Points"
+            };
+            let cost = 1;
+            let multiplier = 2;
+            for (let i = 1; i <= count; i++) {
+                let upgrade = {
+                    name: getRandomName(),
+                    cost: cost,
+                    multiplier: multiplier,
+                    description: `Multiplies ${resources[tier]} by x${multiplier}`
+                };
+                upgrades[tier].push(upgrade);
+                cost *= 2; // Double the cost each time
+                multiplier *= 2; // Double the multiplier each time
+            }
+            renderUpgrades(tier);
+        }
+
+        function renderUpgrades(tier) {
+            const container = document.getElementById(`${tier}UpgradesContainer`);
+            container.innerHTML = '';
+            upgrades[tier].forEach((upgrade, index) => {
+                const btn = document.createElement('button');
+                btn.innerText = `${upgrade.name} - Cost: ${formatNumber(upgrade.cost)}`;
+                btn.title = upgrade.description;
+                btn.onclick = () => buyUpgrade(tier, index);
+                container.appendChild(btn);
+            });
+        }
+
+        function buyUpgrade(tier, index) {
+            const upgrade = upgrades[tier][index];
+            const tierPoints = getTierPoints(tier);
+            if (tierPoints.points >= upgrade.cost) {
+                tierPoints.setPoints(tierPoints.points - upgrade.cost);
+                applyMultiplier(tier, upgrade.multiplier);
+                upgrade.cost *= 2; // Double the cost for next purchase
+                upgrade.multiplier *= 2; // Double the multiplier for next purchase
+                updateDisplay();
+                playSound('purchase');
+                showNotification(`Purchased ${upgrade.name}`);
+                renderUpgrades(tier);
+            } else {
+                showNotification(`Not enough ${tierPoints.name} to purchase this upgrade!`);
+            }
+        }
+
+        function applyMultiplier(tier, multiplier) {
+            switch (tier) {
+                case 'normal':
+                    normalMultiplier *= multiplier;
+                    break;
+                case 'rebirth':
+                    rebirthMultiplier *= multiplier;
+                    break;
+                case 'prestige':
+                    prestigeMultiplier *= multiplier;
+                    break;
+                case 'ultra':
+                    ultraMultiplier *= multiplier;
+                    break;
+                case 'quantum':
+                    quantumMultiplier *= multiplier;
+                    break;
+                case 'omega':
+                    omegaMultiplier *= multiplier;
+                    break;
+                case 'nova':
+                    novaMultiplier *= multiplier;
+                    break;
+                case 'galactic':
+                    galacticMultiplier *= multiplier;
+                    break;
+                case 'cosmic':
+                    cosmicMultiplier *= multiplier;
+                    break;
+                case 'infinite':
+                    infiniteMultiplier *= multiplier;
+                    break;
+                case 'ethereal':
+                    etherealMultiplier *= multiplier;
+                    break;
+                case 'transcendent':
+                    transcendentMultiplier *= multiplier;
+                    break;
+            }
+        }
+
+        function getTierPoints(tier) {
+            switch (tier) {
+                case 'normal':
+                    return { points: clicks, setPoints: val => clicks = val, name: 'Clicks' };
+                case 'rebirth':
+                    return { points: rebirthPoints, setPoints: val => rebirthPoints = val, name: 'Rebirth Points' };
+                case 'prestige':
+                    return { points: prestigePoints, setPoints: val => prestigePoints = val, name: 'Prestige Points' };
+                case 'ultra':
+                    return { points: ultraPoints, setPoints: val => ultraPoints = val, name: 'Ultra Points' };
+                case 'quantum':
+                    return { points: quantumPoints, setPoints: val => quantumPoints = val, name: 'Quantum Points' };
+                case 'omega':
+                    return { points: omegaPoints, setPoints: val => omegaPoints = val, name: 'Omega Points' };
+                case 'nova':
+                    return { points: novaPoints, setPoints: val => novaPoints = val, name: 'Nova Points' };
+                case 'galactic':
+                    return { points: galacticPoints, setPoints: val => galacticPoints = val, name: 'Galactic Points' };
+                case 'cosmic':
+                    return { points: cosmicPoints, setPoints: val => cosmicPoints = val, name: 'Cosmic Points' };
+                case 'infinite':
+                    return { points: infinitePoints, setPoints: val => infinitePoints = val, name: 'Infinite Points' };
+                case 'ethereal':
+                    return { points: etherealPoints, setPoints: val => etherealPoints = val, name: 'Ethereal Points' };
+                case 'transcendent':
+                    return { points: transcendentPoints, setPoints: val => transcendentPoints = val, name: 'Transcendent Points' };
+            }
+        }
+
+        // Game Functions
+        function increment() {
+            let totalMultiplier = normalMultiplier;
+            // Multiply by higher tier multipliers
+            totalMultiplier *= rebirthMultiplier;
+            totalMultiplier *= prestigeMultiplier;
+            totalMultiplier *= ultraMultiplier;
+            totalMultiplier *= quantumMultiplier;
+            totalMultiplier *= omegaMultiplier;
+            totalMultiplier *= novaMultiplier;
+            totalMultiplier *= galacticMultiplier;
+            totalMultiplier *= cosmicMultiplier;
+            totalMultiplier *= infiniteMultiplier;
+            totalMultiplier *= etherealMultiplier;
+            totalMultiplier *= transcendentMultiplier;
+
+            clicks += incrementAmount * totalMultiplier;
+            updateDisplay();
+            playSound('click');
+            checkAchievements();
+            checkEnding();
+        }
+
+        function updateDisplay() {
+            document.getElementById('counter').innerText = formatNumber(clicks);
+            document.getElementById('statClicks').innerText = formatNumber(clicks);
+            document.getElementById('statRebirthPoints').innerText = formatNumber(rebirthPoints);
+            document.getElementById('statPrestigePoints').innerText = formatNumber(prestigePoints);
+            document.getElementById('statUltraPoints').innerText = formatNumber(ultraPoints);
+            document.getElementById('statQuantumPoints').innerText = formatNumber(quantumPoints);
+            document.getElementById('statOmegaPoints').innerText = formatNumber(omegaPoints);
+            document.getElementById('statNovaPoints').innerText = formatNumber(novaPoints);
+            document.getElementById('statGalacticPoints').innerText = formatNumber(galacticPoints);
+            document.getElementById('statCosmicPoints').innerText = formatNumber(cosmicPoints);
+            document.getElementById('statInfinitePoints').innerText = formatNumber(infinitePoints);
+            document.getElementById('statEtherealPoints').innerText = formatNumber(etherealPoints);
+            document.getElementById('statTranscendentPoints').innerText = formatNumber(transcendentPoints);
+            document.getElementById('skillPointsDisplay').innerText = skillPoints;
+
+            // Update Rebirth Costs
+            rebirthCost = initialRebirthCost * Math.pow(rebirthCostMultiplier, rebirthCount);
+            document.getElementById('rebirthCostDisplay').innerText = formatNumber(rebirthCost);
+            document.getElementById('prestigeCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, prestigeCount))} RP`;
+            document.getElementById('ultraCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, ultraCount))} PP`;
+            document.getElementById('quantumCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, quantumCount))} UP`;
+            document.getElementById('omegaCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, omegaCount))} QP`;
+            document.getElementById('novaCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, novaCount))} OP`;
+            document.getElementById('galacticCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, galacticCount))} NP`;
+            document.getElementById('cosmicCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, cosmicCount))} GP`;
+            document.getElementById('infiniteCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, infiniteCount))} CP`;
+            document.getElementById('etherealCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, etherealCount))} IP`;
+            document.getElementById('transcendentCostDisplay').innerText = `${formatNumber(10 * Math.pow(2, transcendentCount))} EP`;
+
+            // Update button availability
+            document.getElementById('rebirthButton').disabled = clicks < rebirthCost;
+            document.getElementById('prestigeButton').disabled = rebirthPoints < 10 * Math.pow(2, prestigeCount);
+            document.getElementById('ultraRebirthButton').disabled = prestigePoints < 10 * Math.pow(2, ultraCount);
+            document.getElementById('quantumRebirthButton').disabled = ultraPoints < 10 * Math.pow(2, quantumCount);
+            document.getElementById('omegaRebirthButton').disabled = quantumPoints < 10 * Math.pow(2, omegaCount);
+            document.getElementById('novaRebirthButton').disabled = omegaPoints < 10 * Math.pow(2, novaCount);
+            document.getElementById('galacticRebirthButton').disabled = novaPoints < 10 * Math.pow(2, galacticCount);
+            document.getElementById('cosmicRebirthButton').disabled = galacticPoints < 10 * Math.pow(2, cosmicCount);
+            document.getElementById('infiniteRebirthButton').disabled = cosmicPoints < 10 * Math.pow(2, infiniteCount);
+            document.getElementById('etherealRebirthButton').disabled = infinitePoints < 10 * Math.pow(2, etherealCount);
+            document.getElementById('transcendentRebirthButton').disabled = etherealPoints < 10 * Math.pow(2, transcendentCount);
+        }
+
+        function formatNumber(num) {
+            if (num < 1e3) return num.toFixed(0);
+
+            const SI_SYMBOL = [
+                "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc",
+                "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod",
+                "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg",
+                "Tg", "Utg", "Dtg", "Ttg", "Qatg", "Qitg", "Sxtg", "Sptg", "Octg", "Notg",
+                "Qag", "Uqag", "Dqag", "Tqag", "Qaqag", "Qiqag", "Sxqag", "Spqag", "Ocqag", "Noqag",
+                "Qig", "Uqig", "Dqig", "Tqig", "Qaqig", "Qiqig", "Sxqig", "Spqig", "Ocqig", "Noqig",
+                "Sxg", "Usxg", "Dsxg", "Tsxg", "Qasxg", "Qisxg", "Sxsxg", "Spsxg", "Ocsxg", "Nosxg",
+                "Spg", "Uspg", "Dspg", "Tspg", "Qaspg", "Qispg", "Sxspg", "Spspg", "Ocspg", "Nospg",
+                "Ocg", "Uocg", "Docg", "Tocg", "Qaocg", "Qiocg", "Sxocg", "Spocg", "Ococg", "Noocg",
+                "Nog", "Unog", "Dnog", "Tnog", "Qanog", "Qinog", "Sxnog", "Spnog", "Ocnog", "Nonog",
+                "C", "Uc", "Dc"
+            ];
+            const tier = Math.floor(Math.log10(num) / 3);
+
+            if (tier === 0) return num.toString();
+
+            const suffix = SI_SYMBOL[tier];
+            const scale = Math.pow(10, tier * 3);
+            const scaled = num / scale;
+
+            return scaled.toFixed(2) + suffix;
+        }
+
+        // Rebirth Functions
+        function rebirth() {
+            const rebirthCost = initialRebirthCost * Math.pow(rebirthCostMultiplier, rebirthCount);
+            if (clicks >= rebirthCost) {
+                rebirthPoints += Math.floor(clicks / rebirthCost);
+                clicks = 0;
+                normalMultiplier = 1; // Reset lower tier multiplier
+                rebirthCount++;
+                updateDisplay();
+                playSound('rebirth');
+                showNotification('Rebirth achieved! Rebirth Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function prestige() {
+            let cost = 10 * Math.pow(2, prestigeCount);
+            if (rebirthPoints >= cost) {
+                prestigePoints += Math.floor(rebirthPoints / cost);
+                rebirthPoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1; // Reset lower tier multiplier
+                prestigeCount++;
+                updateDisplay();
+                playSound('prestige');
+                showNotification('Prestige achieved! Prestige Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function ultraRebirth() {
+            let cost = 10 * Math.pow(2, ultraCount);
+            if (prestigePoints >= cost) {
+                ultraPoints += Math.floor(prestigePoints / cost);
+                prestigePoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1;
+                prestigeMultiplier = 1;
+                ultraCount++;
+                updateDisplay();
+                playSound('ultraRebirth');
+                showNotification('Ultra Rebirth achieved! Ultra Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function quantumRebirth() {
+            let cost = 10 * Math.pow(2, quantumCount);
+            if (ultraPoints >= cost) {
+                quantumPoints += Math.floor(ultraPoints / cost);
+                ultraPoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1;
+                prestigeMultiplier = 1;
+                ultraMultiplier = 1;
+                quantumCount++;
+                updateDisplay();
+                playSound('quantumRebirth');
+                showNotification('Quantum Rebirth achieved! Quantum Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function omegaRebirth() {
+            let cost = 10 * Math.pow(2, omegaCount);
+            if (quantumPoints >= cost) {
+                omegaPoints += Math.floor(quantumPoints / cost);
+                quantumPoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1;
+                prestigeMultiplier = 1;
+                ultraMultiplier = 1;
+                quantumMultiplier = 1;
+                omegaCount++;
+                updateDisplay();
+                playSound('omegaRebirth');
+                showNotification('Omega Rebirth achieved! Omega Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function novaRebirth() {
+            let cost = 10 * Math.pow(2, novaCount);
+            if (omegaPoints >= cost) {
+                novaPoints += Math.floor(omegaPoints / cost);
+                omegaPoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1;
+                prestigeMultiplier = 1;
+                ultraMultiplier = 1;
+                quantumMultiplier = 1;
+                omegaMultiplier = 1;
+                novaCount++;
+                updateDisplay();
+                playSound('novaRebirth');
+                showNotification('Nova Rebirth achieved! Nova Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function galacticRebirth() {
+            let cost = 10 * Math.pow(2, galacticCount);
+            if (novaPoints >= cost) {
+                galacticPoints += Math.floor(novaPoints / cost);
+                novaPoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1;
+                prestigeMultiplier = 1;
+                ultraMultiplier = 1;
+                quantumMultiplier = 1;
+                omegaMultiplier = 1;
+                novaMultiplier = 1;
+                galacticCount++;
+                updateDisplay();
+                playSound('galacticRebirth');
+                showNotification('Galactic Rebirth achieved! Galactic Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function cosmicRebirth() {
+            let cost = 10 * Math.pow(2, cosmicCount);
+            if (galacticPoints >= cost) {
+                cosmicPoints += Math.floor(galacticPoints / cost);
+                galacticPoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1;
+                prestigeMultiplier = 1;
+                ultraMultiplier = 1;
+                quantumMultiplier = 1;
+                omegaMultiplier = 1;
+                novaMultiplier = 1;
+                galacticMultiplier = 1;
+                cosmicCount++;
+                updateDisplay();
+                playSound('cosmicRebirth');
+                showNotification('Cosmic Rebirth achieved! Cosmic Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function infiniteRebirth() {
+            let cost = 10 * Math.pow(2, infiniteCount);
+            if (cosmicPoints >= cost) {
+                infinitePoints += Math.floor(cosmicPoints / cost);
+                cosmicPoints = 0;
+                normalMultiplier = 1;
+                rebirthMultiplier = 1;
+                prestigeMultiplier = 1;
+                ultraMultiplier = 1;
+                quantumMultiplier = 1;
+                omegaMultiplier = 1;
+                novaMultiplier = 1;
+                galacticMultiplier = 1;
+                cosmicMultiplier = 1;
+                infiniteCount++;
+                updateDisplay();
+                playSound('infiniteRebirth');
+                showNotification('Infinite Rebirth achieved! Infinite Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function etherealRebirth() {
+            let cost = 10 * Math.pow(2, etherealCount);
+            if (infinitePoints >= cost) {
+                etherealPoints += Math.floor(infinitePoints / cost);
+                infinitePoints = 0;
+                resetAllPointsBelow('ethereal');
+                etherealCount++;
+                updateDisplay();
+                playSound('etherealRebirth');
+                showNotification('Ethereal Rebirth achieved! Ethereal Points earned.');
+                checkAchievements();
+            }
+        }
+
+        function transcendentRebirth() {
+            let cost = 10 * Math.pow(2, transcendentCount);
+            if (etherealPoints >= cost) {
+                transcendentPoints += Math.floor(etherealPoints / cost);
+                etherealPoints = 0;
+                resetAllPointsBelow('transcendent');
+                transcendentCount++;
+                gameCompleted = true;
+                updateDisplay();
+                playSound('transcendentRebirth');
+                showNotification('Transcendent Rebirth achieved! Transcendent Points earned.');
+                checkAchievements();
+                checkEnding();
+            }
+        }
+
+        function resetAllPointsBelow(tier) {
+            const tiers = ['clicks', 'rebirthPoints', 'prestigePoints', 'ultraPoints', 'quantumPoints', 'omegaPoints', 'novaPoints', 'galacticPoints', 'cosmicPoints', 'infinitePoints', 'etherealPoints'];
+            const multipliers = ['normalMultiplier', 'rebirthMultiplier', 'prestigeMultiplier', 'ultraMultiplier', 'quantumMultiplier', 'omegaMultiplier', 'novaMultiplier', 'galacticMultiplier', 'cosmicMultiplier', 'infiniteMultiplier', 'etherealMultiplier'];
+            let tierIndex = {
+                'clicksPoints': 0,
+                'rebirthPoints': 1,
+                'prestigePoints': 2,
+                'ultraPoints': 3,
+                'quantumPoints': 4,
+                'omegaPoints': 5,
+                'novaPoints': 6,
+                'galacticPoints': 7,
+                'cosmicPoints': 8,
+                'infinitePoints': 9,
+                'etherealPoints': 10,
+                'transcendentPoints': 11
+            }[tier + 'Points'];
+            for (let i = 0; i <= tierIndex; i++) {
+                window[tiers[i]] = 0;
+                window[multipliers[i]] = 1;
+            }
+        }
+
+        // Show Upgrade Section
+        function showUpgradeSection(section) {
+            const sections = ['normal', 'rebirth', 'prestige', 'ultra', 'quantum', 'omega', 'nova', 'galactic', 'cosmic', 'infinite', 'ethereal', 'transcendent'];
+            sections.forEach(sec => {
+                document.getElementById(`${sec}UpgradeSection`).style.display = 'none';
+                document.getElementById(`${sec}UpgradeSubPanel`).classList.remove('active');
+            });
+            document.getElementById(`${section}UpgradeSection`).style.display = 'block';
+            document.getElementById(`${section}UpgradeSubPanel`).classList.add('active');
+        }
+
+        // Show Main Sections
+        function showSection(section) {
+            document.getElementById('normalSection').style.display = 'none';
+            document.getElementById('achievementsSection').style.display = 'none';
+            document.getElementById('skillTreeSection').style.display = 'none';
+            document.getElementById('normalUpgradePanel').classList.remove('active');
+            document.getElementById('achievementsPanel').classList.remove('active');
+            document.getElementById('skillTreePanel').classList.remove('active');
+            if (section === 'normal') {
+                document.getElementById('normalSection').style.display = 'block';
+                document.getElementById('normalUpgradePanel').classList.add('active');
+            } else if (section === 'achievements') {
+                document.getElementById('achievementsSection').style.display = 'block';
+                document.getElementById('achievementsPanel').classList.add('active');
+            } else if (section === 'skillTree') {
+                document.getElementById('skillTreeSection').style.display = 'block';
+                document.getElementById('skillTreePanel').classList.add('active');
+                drawSkillTree();
+            }
+        }
+
+        // Skill Tree Implementation
+        let skills = [];
+
+        function initializeSkills() {
+            // Define skill names, descriptions, effects, positions, costs, and prerequisites
+            skills = [
+                { id: 1, name: 'Click Power I', description: 'Increase click power by 1', effect: () => incrementAmount += 1, x: 450, y: 50, cost: 5, unlocked: skillTree[1], prereq: null },
+                { id: 2, name: 'Auto Clicker', description: 'Automatically clicks every second', effect: startAutoClicker, x: 450, y: 150, cost: 5, unlocked: skillTree[2], prereq: 1 },
+                { id: 3, name: 'Click Power II', description: 'Increase click power by 5', effect: () => incrementAmount += 5, x: 350, y: 250, cost: 10, unlocked: skillTree[3], prereq: 2 },
+                { id: 4, name: 'Rebirth Boost', description: 'Increase rebirth multiplier by 10%', effect: () => rebirthMultiplier *= 1.1, x: 550, y: 250, cost: 10, unlocked: skillTree[4], prereq: 2 },
+                { id: 5, name: 'Auto Rebirth', description: 'Automatically rebirths every 5 seconds', effect: startAutoRebirth, x: 450, y: 350, cost: 15, unlocked: skillTree[5], prereq: [3,4] },
+                // Added 5 more skills
+                { id: 6, name: 'Prestige Boost', description: 'Increase prestige multiplier by 10%', effect: () => prestigeMultiplier *= 1.1, x: 350, y: 450, cost: 15, unlocked: skillTree[6], prereq: 5 },
+                { id: 7, name: 'Auto Prestige', description: 'Automatically prestige every 10 seconds', effect: startAutoPrestige, x: 550, y: 450, cost: 20, unlocked: skillTree[7], prereq: 5 },
+                { id: 8, name: 'Ultra Boost', description: 'Increase ultra multiplier by 10%', effect: () => ultraMultiplier *= 1.1, x: 450, y: 550, cost: 25, unlocked: skillTree[8], prereq: [6,7] },
+                { id: 9, name: 'Click Frenzy', description: 'Double click power for 30 seconds', effect: activateClickFrenzy, x: 350, y: 650, cost: 30, unlocked: skillTree[9], prereq: 8 },
+                { id: 10, name: 'Skill Mastery', description: 'Increase all multipliers by 5%', effect: () => {
+                    rebirthMultiplier *= 1.05;
+                    prestigeMultiplier *= 1.05;
+                    ultraMultiplier *= 1.05;
+                    quantumMultiplier *= 1.05;
+                    omegaMultiplier *= 1.05;
+                    novaMultiplier *= 1.05;
+                    galacticMultiplier *= 1.05;
+                    cosmicMultiplier *= 1.05;
+                    infiniteMultiplier *= 1.05;
+                    etherealMultiplier *= 1.05;
+                }, x: 550, y: 650, cost: 35, unlocked: skillTree[10], prereq: 8 },
+                // Additional 5 skills
+                { id: 11, name: 'Quantum Leap', description: 'Increase quantum multiplier by 10%', effect: () => quantumMultiplier *= 1.1, x: 450, y: 750, cost: 40, unlocked: skillTree[11], prereq: 10 },
+                { id: 12, name: 'Omega Boost', description: 'Increase omega multiplier by 10%', effect: () => omegaMultiplier *= 1.1, x: 350, y: 850, cost: 45, unlocked: skillTree[12], prereq: 11 },
+                { id: 13, name: 'Galactic Surge', description: 'Increase galactic multiplier by 10%', effect: () => galacticMultiplier *= 1.1, x: 550, y: 850, cost: 50, unlocked: skillTree[13], prereq: 11 },
+                { id: 14, name: 'Cosmic Burst', description: 'Increase cosmic multiplier by 10%', effect: () => cosmicMultiplier *= 1.1, x: 450, y: 950, cost: 55, unlocked: skillTree[14], prereq: [12,13] },
+                { id: 15, name: 'Transcendent Blessing', description: 'Increase all multipliers by 10%', effect: () => {
+                    rebirthMultiplier *= 1.1;
+                    prestigeMultiplier *= 1.1;
+                    ultraMultiplier *= 1.1;
+                    quantumMultiplier *= 1.1;
+                    omegaMultiplier *= 1.1;
+                    novaMultiplier *= 1.1;
+                    galacticMultiplier *= 1.1;
+                    cosmicMultiplier *= 1.1;
+                    infiniteMultiplier *= 1.1;
+                    etherealMultiplier *= 1.1;
+                }, x: 450, y: 1050, cost: 60, unlocked: skillTree[15], prereq: 14 },
+                // Additional 5 skills to make 20 total
+                { id: 16, name: 'Nova Explosion', description: 'Increase nova multiplier by 10%', effect: () => novaMultiplier *= 1.1, x: 350, y: 1150, cost: 65, unlocked: skillTree[16], prereq: 15 },
+                { id: 17, name: 'Infinite Potential', description: 'Increase infinite multiplier by 10%', effect: () => infiniteMultiplier *= 1.1, x: 550, y: 1150, cost: 70, unlocked: skillTree[17], prereq: 15 },
+                { id: 18, name: 'Ethereal Wisdom', description: 'Increase ethereal multiplier by 10%', effect: () => etherealMultiplier *= 1.1, x: 450, y: 1250, cost: 75, unlocked: skillTree[18], prereq: [16,17] },
+                { id: 19, name: 'Ascension', description: 'Double all multipliers for 60 seconds', effect: activateAscension, x: 450, y: 1350, cost: 80, unlocked: skillTree[19], prereq: 18 },
+                { id: 20, name: 'Final Mastery', description: 'Increase all multipliers by 20%', effect: () => {
+                    rebirthMultiplier *= 1.2;
+                    prestigeMultiplier *= 1.2;
+                    ultraMultiplier *= 1.2;
+                    quantumMultiplier *= 1.2;
+                    omegaMultiplier *= 1.2;
+                    novaMultiplier *= 1.2;
+                    galacticMultiplier *= 1.2;
+                    cosmicMultiplier *= 1.2;
+                    infiniteMultiplier *= 1.2;
+                    etherealMultiplier *= 1.2;
+                }, x: 450, y: 1450, cost: 100, unlocked: skillTree[20], prereq: 19 },
+            ];
+        }
+
+        function drawSkillTree() {
+            initializeSkills();
+            const canvas = document.getElementById('skillTreeCanvas');
+            canvas.width = 900;
+            canvas.height = 2000;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connections
+            ctx.strokeStyle = '#fff';
+            skills.forEach(skill => {
+                if (skill.prereq) {
+                    const prereqSkills = Array.isArray(skill.prereq) ? skill.prereq : [skill.prereq];
+                    prereqSkills.forEach(prereqId => {
+                        const prereqSkill = skills.find(s => s.id === prereqId);
+                        if (prereqSkill) {
+                            ctx.beginPath();
+                            ctx.moveTo(skill.x, skill.y);
+                            ctx.lineTo(prereqSkill.x, prereqSkill.y);
+                            ctx.stroke();
+                        }
+                    });
+                }
+            });
+
+            // Draw skills
+            skills.forEach(skill => {
+                ctx.fillStyle = skill.unlocked ? '#2ecc71' : '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(skill.x, skill.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(skill.name, skill.x, skill.y - 20);
+                ctx.fillText(`Cost: ${formatNumber(skill.cost)}`, skill.x, skill.y + 30);
+                ctx.fillText(skill.unlocked ? 'Unlocked' : 'Locked', skill.x, skill.y + 50);
+                // Attach click event to skill
+                canvas.addEventListener('click', (event) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = event.clientX - rect.left;
+                    const mouseY = event.clientY - rect.top;
+                    if (Math.hypot(skill.x - mouseX, skill.y - mouseY) <= 15 && !skill.unlocked) {
+                        buySkill(skill.id);
+                    }
+                });
+            });
+        }
+
+        function buySkill(id) {
+            const skill = skills.find(s => s.id === id);
+            if (skillPoints >= skill.cost && !skill.unlocked) {
+                skillPoints -= skill.cost;
+                skill.unlocked = true;
+                skillTree[skill.id] = true;
+                skill.effect();
+                updateDisplay();
+                playSound('purchase');
+                showNotification(`Skill Unlocked: ${skill.name}`);
+                drawSkillTree();
+            } else {
+                showNotification('Not enough skill points or skill already unlocked!');
+            }
+        }
+
+        function startAutoClicker() {
+            setInterval(() => {
+                increment();
+            }, 1000);
+        }
+
+        function startAutoRebirth() {
+            setInterval(() => {
+                rebirth();
+            }, 5000);
+        }
+
+        function startAutoPrestige() {
+            setInterval(() => {
+                prestige();
+            }, 10000);
+        }
+
+        function activateClickFrenzy() {
+            let originalIncrementAmount = incrementAmount;
+            incrementAmount *= 2;
+            setTimeout(() => {
+                incrementAmount = originalIncrementAmount;
+            }, 30000);
+        }
+
+        function activateAscension() {
+            let originalMultipliers = {
+                rebirthMultiplier,
+                prestigeMultiplier,
+                ultraMultiplier,
+                quantumMultiplier,
+                omegaMultiplier,
+                novaMultiplier,
+                galacticMultiplier,
+                cosmicMultiplier,
+                infiniteMultiplier,
+                etherealMultiplier,
+                transcendentMultiplier
+            };
+            Object.keys(originalMultipliers).forEach(key => {
+                window[key] *= 2;
+            });
+            setTimeout(() => {
+                Object.keys(originalMultipliers).forEach(key => {
+                    window[key] = originalMultipliers[key];
+                });
+            }, 60000);
+        }
+
+        // Achievements Rendering
+        function renderAchievements() {
+            const container = document.getElementById('achievementsContainer');
+            container.innerHTML = '';
+            achievements.forEach(achievement => {
+                const achievementDiv = document.createElement('div');
+                achievementDiv.classList.add('achievement');
+                if (achievement.unlocked) {
+                    achievementDiv.classList.add('unlocked');
+                }
+                achievementDiv.innerHTML = `
+                    <strong>${achievement.name}</strong>
+                    <p>${achievement.description}</p>
+                    <span class="rating ${getRatingClass(achievement.skillPoints)}">${achievement.skillPoints}</span>
+                `;
+                container.appendChild(achievementDiv);
+            });
+        }
+
+        function getRatingClass(skillPoints) {
+            if (skillPoints < 10) return 'green';
+            if (skillPoints < 20) return 'yellow';
+            return 'red';
+        }
+
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!achievement.unlocked && achievement.condition()) {
+                    achievement.unlocked = true;
+                    skillPoints += achievement.skillPoints;
+                    showAchievementPopup(achievement.name);
+                    playSound('achievement');
+                    renderAchievements();
+                    updateDisplay();
+                }
+            });
+        }
+
+        // Sound and Notification
+        function playSound(sound) {
+            if (soundEnabled) {
+                let audio = new Audio(`sounds/${sound}.mp3`);
+                audio.play();
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+        }
+
+        function showAchievementPopup(name) {
+            const popup = document.getElementById('achievementPopup');
+            popup.innerText = `Achievement Unlocked: ${name}`;
+            popup.style.display = 'block';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 3000);
+        }
+
+        // Game Saving and Loading
+        function saveGame() {
+            const gameData = {
+                clicks,
+                rebirthPoints,
+                prestigePoints,
+                ultraPoints,
+                quantumPoints,
+                omegaPoints,
+                novaPoints,
+                galacticPoints,
+                cosmicPoints,
+                infinitePoints,
+                etherealPoints,
+                transcendentPoints,
+                rebirthCount,
+                prestigeCount,
+                ultraCount,
+                quantumCount,
+                omegaCount,
+                novaCount,
+                galacticCount,
+                cosmicCount,
+                infiniteCount,
+                etherealCount,
+                transcendentCount,
+                skillPoints,
+                skillTree,
+                achievements
+            };
+            localStorage.setItem('incrementalGameSave', JSON.stringify(gameData));
+            showNotification('Game Saved Successfully!');
+        }
+
+        function loadGame() {
+            const savedData = localStorage.getItem('incrementalGameSave');
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                clicks = gameData.clicks;
+                rebirthPoints = gameData.rebirthPoints;
+                prestigePoints = gameData.prestigePoints;
+                ultraPoints = gameData.ultraPoints;
+                quantumPoints = gameData.quantumPoints;
+                omegaPoints = gameData.omegaPoints;
+                novaPoints = gameData.novaPoints;
+                galacticPoints = gameData.galacticPoints;
+                cosmicPoints = gameData.cosmicPoints;
+                infinitePoints = gameData.infinitePoints;
+                etherealPoints = gameData.etherealPoints;
+                transcendentPoints = gameData.transcendentPoints;
+                rebirthCount = gameData.rebirthCount;
+                prestigeCount = gameData.prestigeCount;
+                ultraCount = gameData.ultraCount;
+                quantumCount = gameData.quantumCount;
+                omegaCount = gameData.omegaCount;
+                novaCount = gameData.novaCount;
+                galacticCount = gameData.galacticCount;
+                cosmicCount = gameData.cosmicCount;
+                infiniteCount = gameData.infiniteCount;
+                etherealCount = gameData.etherealCount;
+                transcendentCount = gameData.transcendentCount;
+                skillPoints = gameData.skillPoints;
+                skillTree = gameData.skillTree;
+                achievements = gameData.achievements;
+                updateDisplay();
+                renderUpgrades('normal');
+                renderUpgrades('rebirth');
+                renderUpgrades('prestige');
+                renderUpgrades('ultra');
+                renderUpgrades('quantum');
+                renderUpgrades('omega');
+                renderUpgrades('nova');
+                renderUpgrades('galactic');
+                renderUpgrades('cosmic');
+                renderUpgrades('infinite');
+                renderUpgrades('ethereal');
+                renderUpgrades('transcendent');
+                renderAchievements();
+                drawSkillTree();
+                showNotification('Game Loaded Successfully!');
+            } else {
+                showNotification('No Save Data Found!');
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Are you sure you want to reset the game? This will delete all progress.')) {
+                clicks = 0;
+                rebirthPoints = 0;
+                prestigePoints = 0;
+                ultraPoints = 0;
+                quantumPoints = 0;
+                omegaPoints = 0;
+                novaPoints = 0;
+                galacticPoints = 0;
+                cosmicPoints = 0;
+                infinitePoints = 0;
+                etherealPoints = 0;
+                transcendentPoints = 0;
+                rebirthCount = 0;
+                prestigeCount = 0;
+                ultraCount = 0;
+                quantumCount = 0;
+                omegaCount = 0;
+                novaCount = 0;
+                galacticCount = 0;
+                cosmicCount = 0;
+                infiniteCount = 0;
+                etherealCount = 0;
+                transcendentCount = 0;
+                skillPoints = 0;
+                skillTree = {};
+                achievements.forEach(achievement => achievement.unlocked = false);
+                gameCompleted = false;
+                updateDisplay();
+                renderUpgrades('normal');
+                renderUpgrades('rebirth');
+                renderUpgrades('prestige');
+                renderUpgrades('ultra');
+                renderUpgrades('quantum');
+                renderUpgrades('omega');
+                renderUpgrades('nova');
+                renderUpgrades('galactic');
+                renderUpgrades('cosmic');
+                renderUpgrades('infinite');
+                renderUpgrades('ethereal');
+                renderUpgrades('transcendent');
+                renderAchievements();
+                drawSkillTree();
+                localStorage.removeItem('incrementalGameSave');
+                showNotification('Game Reset Successfully!');
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            showNotification(`Sound ${soundEnabled ? 'Enabled' : 'Disabled'}`);
+        }
+
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            showNotification(`Music ${musicEnabled ? 'Enabled' : 'Disabled'}`);
+        }
+
+        function toggleOptionsMenu() {
+            const optionsMenu = document.getElementById('optionsMenu');
+            optionsMenu.style.display = optionsMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function checkEnding() {
+            if (gameCompleted) {
+                document.getElementById('endingMessage').style.display = 'block';
+            }
+        }
+
+        // Initialize Game
+        initializeUpgrades();
+        updateDisplay();
+    </script>
+</body>
+</html>
